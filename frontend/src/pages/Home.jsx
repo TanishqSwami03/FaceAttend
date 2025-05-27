@@ -7,7 +7,7 @@ import PageTransition from "../components/PageTransition"
 import Card from "../components/Card"
 import Webcam from "../components/Webcam"
 import Popup from "../components/Popup"
-import Logo from "../components/Logo"
+import Header from "../components/Header"
 
 const Home = () => {
   const navigate = useNavigate()
@@ -40,13 +40,13 @@ const Home = () => {
 
   return (
     <PageTransition>
-      <Logo />
+      <Header username="John Doe" />
       <h1 className="page-title">Attendance System Using Face Recognition</h1>
 
       <div className="cards-container">
         <Card title="Mark Attendance" icon={<FaUserCheck />} onClick={handleMarkAttendance} />
         <Card title="Add Student" icon={<FaUserPlus />} onClick={() => navigate("/add-student")} />
-        <Card title="Admin Login" icon={<FaUserShield />} onClick={() => navigate("/admin-login")} />
+        <Card title="Admin" icon={<FaUserShield />} onClick={() => navigate("/admin-dashboard")} />
       </div>
 
       {showWebcam && (

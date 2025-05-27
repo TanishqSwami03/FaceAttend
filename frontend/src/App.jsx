@@ -12,13 +12,12 @@ import AttendanceHistory from "./pages/AttendanceHistory"
 import CheckStudents from "./pages/CheckStudents"
 import Courses from "./pages/Courses"
 import Admins from "./pages/Admins"
-import MaintenanceGlitch from "./maintenance_page/MaintenanceGlitch"
+import Login from "./pages/Login"
+import Register from "./pages/Register"
 import "./App.css"
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-
-  const isInMaintenance = true
 
   return (
     <Router>
@@ -26,33 +25,29 @@ function App() {
         <div className="ambient-light"></div>
         <AnimatePresence mode="wait">
           <Routes>
-            {isInMaintenance ? (
-              <Route path="*" element={<MaintenanceGlitch />} />
-            ) : (
-              <>
-                <Route path="/" element={<Home />} />
-                <Route path="/add-student" element={<AddStudent />} />
-                <Route path="/admin-login" element={<AdminLogin setIsAuthenticated={setIsAuthenticated} />} />
-                <Route
-                  path="/admin-dashboard"
-                  element={<AdminDashboard />}
-                />
-                <Route
-                  path="/check-attendance"
-                  element={<CheckAttendance />}
-                />
-                <Route
-                  path="/attendance-history"
-                  element={<AttendanceHistory />}
-                />
-                <Route
-                  path="/check-students"
-                  element={<CheckStudents />}
-                />
-                <Route path="/courses" element={<Courses />} /> 
-                <Route path="/admins" element={<Admins /> } />
-              </>
-            )}
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/add-student" element={<AddStudent />} />
+            <Route path="/admin-login" element={<AdminLogin setIsAuthenticated={setIsAuthenticated} />} />
+            <Route
+              path="/admin-dashboard"
+              element={<AdminDashboard />}
+            />
+            <Route
+              path="/check-attendance"
+              element={<CheckAttendance />} 
+            />
+            <Route
+              path="/attendance-history"
+              element={<AttendanceHistory />}
+            />
+            <Route
+              path="/check-students"
+              element={<CheckStudents />}
+            />
+            <Route path="/courses" element={<Courses />} />
+            <Route path="/admins" element={<Admins />} />
           </Routes>
         </AnimatePresence>
       </div>

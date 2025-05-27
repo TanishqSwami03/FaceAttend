@@ -1,12 +1,11 @@
-"use client"
-
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { FaArrowLeft, FaSignInAlt } from "react-icons/fa"
 import PageTransition from "../components/PageTransition"
 import Button from "../components/Button"
 import Popup from "../components/Popup"
-import Logo from "../components/Logo"
+import Header from "../components/Header"
+import { loginAdmin } from "../api/admin"
 
 const AdminLogin = ({ setIsAuthenticated }) => {
   const navigate = useNavigate()
@@ -18,20 +17,22 @@ const AdminLogin = ({ setIsAuthenticated }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target
-    setFormData({
-      ...formData,
-      [name]: value,
-    })
+    setFormData({ ...formData, [name]: value })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    try {
+      const res = await loginAdmin(formData.email, formData.password)
 
-    // Mock authentication (in a real app, this would be an API call)
-    if (formData.email === "admin@example.com" && formData.password === "password") {
+      // Save token and org name in localStorage
+      localStorage.setItem("token", res.token)
+      localStorage.setItem("organization", res.organization)
+
       setIsAuthenticated(true)
       navigate("/admin-dashboard")
-    } else {
+    } catch (error) {
+      console.error("Login error:", error)
       setPopup({
         show: true,
         type: "error",
@@ -46,7 +47,7 @@ const AdminLogin = ({ setIsAuthenticated }) => {
 
   return (
     <PageTransition>
-      <Logo />
+      <Header username="Guest" />
       <button className="back-btn" onClick={() => navigate("/")}>
         <FaArrowLeft />
       </button>

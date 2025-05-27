@@ -1,23 +1,18 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { FaArrowLeft, FaUserPlus, FaEdit, FaTrash } from "react-icons/fa"
+import { motion } from "framer-motion"
 import PageTransition from "../components/PageTransition"
 import Button from "../components/Button"
 import Popup from "../components/Popup"
-import Logo from "../components/Logo"
-
-// Mock data for admins
-const mockAdmins = [
-  { id: 1, name: "Admin User", email: "admin@example.com" },
-  { id: 2, name: "John Admin", email: "john@example.com" },
-  { id: 3, name: "Jane Admin", email: "jane@example.com" },
-]
+import Header from "../components/Header"
+import { getAllAdmins, addAdmin, deleteAdmin } from "../api/admin"
 
 const Admins = () => {
   const navigate = useNavigate()
-  const [admins, setAdmins] = useState(mockAdmins)
+  const [admins, setAdmins] = useState([])
   const [showAddForm, setShowAddForm] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
@@ -27,49 +22,63 @@ const Admins = () => {
   })
   const [popup, setPopup] = useState({ show: false, type: "", message: "" })
 
+  // Fetch admins on load
+  useEffect(() => {
+    const fetchAdmins = async () => {
+      try {
+        const data = await getAllAdmins()
+        setAdmins(data)
+      } catch (error) {
+        setPopup({
+          show: true,
+          type: "error",
+          message: "Failed to fetch admins.",
+        })
+      }
+    }
+    fetchAdmins()
+  }, [])
+
   const handleChange = (e) => {
     const { name, value } = e.target
-    setFormData({
-      ...formData,
-      [name]: value,
-    })
+    setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleAddAdmin = (e) => {
+  const handleAddAdmin = async (e) => {
     e.preventDefault()
 
     if (formData.password !== formData.confirmPassword) {
-      setPopup({
-        show: true,
-        type: "error",
-        message: "Passwords do not match!",
-      })
+      setPopup({ show: true, type: "error", message: "Passwords do not match!" })
       return
     }
 
-    const newId = Math.max(...admins.map((admin) => admin.id)) + 1
-    setAdmins([...admins, { id: newId, name: formData.name, email: formData.email }])
-    setFormData({
-      name: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-    })
-    setShowAddForm(false)
-    setPopup({
-      show: true,
-      type: "success",
-      message: "Admin added successfully!",
-    })
+    try {
+      await addAdmin({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      })
+
+      const updatedAdmins = await getAllAdmins()
+      setAdmins(updatedAdmins)
+      setFormData({ name: "", email: "", password: "", confirmPassword: "" })
+      setShowAddForm(false)
+      setPopup({ show: true, type: "success", message: "Admin added successfully!" })
+    } catch (error) {
+      const msg = error.response?.data?.message || "Failed to add admin."
+      setPopup({ show: true, type: "error", message: msg })
+    }
   }
 
-  const handleDelete = (id) => {
-    setAdmins(admins.filter((admin) => admin.id !== id))
-    setPopup({
-      show: true,
-      type: "success",
-      message: "Admin deleted successfully!",
-    })
+  const handleDelete = async (id) => {
+    try {
+      await deleteAdmin(id)
+      const updatedAdmins = await getAllAdmins()
+      setAdmins(updatedAdmins)
+      setPopup({ show: true, type: "success", message: "Admin deleted successfully!" })
+    } catch (error) {
+      setPopup({ show: true, type: "error", message: "Failed to delete admin." })
+    }
   }
 
   const handleClosePopup = () => {
@@ -78,15 +87,35 @@ const Admins = () => {
 
   return (
     <PageTransition>
-      <Logo />
-      <button className="back-btn" onClick={() => navigate("/admin-dashboard")}>
+      <Header username="Admin" />
+
+      <motion.div
+        className="enhanced-back-button"
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.3, duration: 0.5 }}
+        whileHover={{
+          scale: 1.1,
+          boxShadow: "0 0 15px rgba(0, 198, 255, 0.5)",
+          borderColor: "rgba(0, 198, 255, 0.8)",
+        }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => navigate("/admin-dashboard")}
+      >
         <FaArrowLeft />
-      </button>
+        <span>Back</span>
+      </motion.div>
 
       <h1 className="page-title">Admins</h1>
 
       <div
-        style={{ width: "100%", maxWidth: "800px", marginBottom: "2rem", display: "flex", justifyContent: "flex-end" }}
+        style={{
+          width: "100%",
+          maxWidth: "800px",
+          marginBottom: "2rem",
+          display: "flex",
+          justifyContent: "flex-end",
+        }}
       >
         <Button variant="primary" onClick={() => setShowAddForm(true)}>
           <FaUserPlus />
@@ -98,9 +127,7 @@ const Admins = () => {
         <div className="form-container" style={{ marginBottom: "2rem", maxWidth: "800px" }}>
           <form onSubmit={handleAddAdmin}>
             <div className="form-group">
-              <label htmlFor="name" className="form-label">
-                Name
-              </label>
+              <label htmlFor="name" className="form-label">Name</label>
               <input
                 type="text"
                 id="name"
@@ -114,9 +141,7 @@ const Admins = () => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="email" className="form-label">
-                Email
-              </label>
+              <label htmlFor="email" className="form-label">Email</label>
               <input
                 type="email"
                 id="email"
@@ -130,9 +155,7 @@ const Admins = () => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="password" className="form-label">
-                Password
-              </label>
+              <label htmlFor="password" className="form-label">Password</label>
               <input
                 type="password"
                 id="password"
@@ -146,9 +169,7 @@ const Admins = () => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="confirmPassword" className="form-label">
-                Confirm Password
-              </label>
+              <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
               <input
                 type="password"
                 id="confirmPassword"
@@ -178,16 +199,16 @@ const Admins = () => {
         <table>
           <thead>
             <tr>
-              <th>ID</th>
+              <th>#</th>
               <th>Name</th>
               <th>Email</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {admins.map((admin) => (
+            {admins.map((admin, index) => (
               <tr key={admin.id}>
-                <td>{admin.id}</td>
+                <td>{index + 1}</td>
                 <td>{admin.name}</td>
                 <td>{admin.email}</td>
                 <td>
@@ -201,6 +222,7 @@ const Admins = () => {
                         cursor: "pointer",
                         color: "var(--accent-color)",
                       }}
+                      disabled
                     >
                       <FaEdit />
                     </button>

@@ -3,9 +3,10 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { FaArrowLeft, FaSearch } from "react-icons/fa"
+import { motion } from "framer-motion"
 import PageTransition from "../components/PageTransition"
 import Button from "../components/Button"
-import Logo from "../components/Logo"
+import Header from "../components/Header"
 
 // Mock data for today's attendance
 const mockAttendance = [
@@ -29,10 +30,24 @@ const CheckAttendance = () => {
 
   return (
     <PageTransition>
-      <Logo />
-      <button className="back-btn" onClick={() => navigate("/admin-dashboard")}>
+      <Header username="Admin" />
+
+      <motion.div
+        className="enhanced-back-button"
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.3, duration: 0.5 }}
+        whileHover={{
+          scale: 1.1,
+          boxShadow: "0 0 15px rgba(0, 198, 255, 0.5)",
+          borderColor: "rgba(0, 198, 255, 0.8)",
+        }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => navigate("/admin-dashboard")}
+      >
         <FaArrowLeft />
-      </button>
+        <span>Back</span>
+      </motion.div>
 
       <h1 className="page-title">Today's Attendance</h1>
 

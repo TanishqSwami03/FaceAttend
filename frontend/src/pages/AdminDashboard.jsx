@@ -1,17 +1,36 @@
 "use client"
 
 import { useNavigate } from "react-router-dom"
-import { FaCalendarAlt, FaClipboardList, FaUserGraduate, FaBook, FaUserShield } from "react-icons/fa"
+import { FaCalendarAlt, FaClipboardList, FaUserGraduate, FaBook, FaUserShield, FaArrowLeft } from "react-icons/fa"
+import { motion } from "framer-motion"
 import PageTransition from "../components/PageTransition"
 import Card from "../components/Card"
-import Logo from "../components/Logo"
+import Header from "../components/Header"
 
 const AdminDashboard = () => {
   const navigate = useNavigate()
 
   return (
     <PageTransition>
-      <Logo />
+      <Header username="Admin" />
+
+      <motion.div
+        className="enhanced-back-button"
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.3, duration: 0.5 }}
+        whileHover={{
+          scale: 1.1,
+          boxShadow: "0 0 15px rgba(0, 198, 255, 0.5)",
+          borderColor: "rgba(0, 198, 255, 0.8)",
+        }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => navigate("/")}
+      >
+        <FaArrowLeft />
+        <span>Back</span>
+      </motion.div>
+
       <h1 className="page-title">Admin Dashboard</h1>
 
       <div className="cards-container">

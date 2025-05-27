@@ -6,7 +6,9 @@ import { FaArrowLeft, FaUserPlus } from "react-icons/fa"
 import PageTransition from "../components/PageTransition"
 import Button from "../components/Button"
 import Popup from "../components/Popup"
-import Logo from "../components/Logo"
+import Header from "../components/Header"
+import { uploadStudentImage } from "../api/supabaseUpload"
+import { motion } from "framer-motion"
 
 const AddStudent = () => {
   const navigate = useNavigate()
@@ -33,25 +35,50 @@ const AddStudent = () => {
     }
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // Simulate form submission
-    console.log("Form submitted:", formData)
+    const admin = JSON.parse(localStorage.getItem("admin"))
 
-    // Show success popup
-    setPopup({
-      show: true,
-      type: "success",
-      message: "Student added successfully!",
-    })
+    try {
+      const imageUrl = await uploadStudentImage(formData.image, admin.organization, formData.name)
 
-    // Reset form
-    setFormData({
-      name: "",
-      section: "",
-      course: "",
-      image: null,
-    })
+      const studentData = {
+        name: formData.name,
+        section: formData.section,
+        course: formData.course,
+        organization: admin.organization,
+        image_url: imageUrl,
+      }
+
+      const res = await fetch("http://127.0.0.1:8000/api/students/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(studentData),
+      })
+
+      if (!res.ok) throw new Error("Failed to add student")
+
+      setPopup({
+        show: true,
+        type: "success",
+        message: "Student added successfully!",
+      })
+
+      setFormData({
+        name: "",
+        section: "",
+        course: "",
+        image: null,
+      })
+    } catch (err) {
+      setPopup({
+        show: true,
+        type: "error",
+        message: err.message || "Something went wrong",
+      })
+    }
   }
 
   const handleClosePopup = () => {
@@ -60,10 +87,23 @@ const AddStudent = () => {
 
   return (
     <PageTransition>
-      <Logo />
-      <button className="back-btn" onClick={() => navigate("/")}>
+      <Header username="John Doe" />
+      <motion.div
+        className="enhanced-back-button"
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.3, duration: 0.5 }}
+        whileHover={{
+          scale: 1.1,
+          boxShadow: "0 0 15px rgba(0, 198, 255, 0.5)",
+          borderColor: "rgba(0, 198, 255, 0.8)",
+        }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => navigate("/admin-dashboard")}
+      >
         <FaArrowLeft />
-      </button>
+        <span>Back</span>
+      </motion.div>
 
       <h1 className="page-title">Add New Student</h1>
 
@@ -142,9 +182,9 @@ const AddStudent = () => {
               <FaUserPlus />
               Add Student
             </Button>
-            <Button type="button" variant="secondary" onClick={() => navigate("/")}>
+            {/* <Button type="button" variant="secondary" onClick={() => navigate("/")}>
               Go Back
-            </Button>
+            </Button> */}
           </div>
         </form>
       </div>
